@@ -25,6 +25,8 @@
 <meta name="twitter:title" content="Cotiza tu pantalla con 15% de descuento — MovilPhone">
 <meta name="twitter:description" content="Busca tu modelo, aplica tu 15% y aparta el precio. Izamal y Buctzotz.">
 <meta name="twitter:image" content="https://movilphone-descuentoenlinea-15.vercel.app/og.jpg">
+<script defer src="/_vercel/insights/script.js"></script>
+<script defer src="/_vercel/speed-insights/script.js"></script>
 <title>Cotizador MovilPhone</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -695,6 +697,26 @@ footer strong{color:var(--texto)}
 (function(){
   "use strict";
 
+  /* ==================================================================
+     PEGA AQUI TU ID DE PIXEL DE META (solo los numeros, entre comillas).
+     Si lo dejas vacio, la pagina funciona igual y no carga nada.
+     ================================================================== */
+  var PIXEL_META = "1348603003387856";
+  /* ================================================================== */
+
+  if (PIXEL_META){
+    !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){
+      n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+      if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];
+      t=b.createElement(e);t.async=!0;t.src=v;
+      s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}
+      (window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+    try { window.fbq('init', PIXEL_META); window.fbq('track','PageView'); } catch(e){}
+  }
+  function pixel(evento, datos){
+    if (window.fbq){ try { window.fbq('track', evento, datos || {}); } catch(e){} }
+  }
+
   var WA = "529911098036";
   var DESCUENTO = 0.15;
   var PROGRAMACION = 400;
@@ -1028,6 +1050,12 @@ footer strong{color:var(--texto)}
 
     if (!menosMovimiento) polvoDorado();
     animarNumero($("precio-final"), c.lista, c.final, 900);
+
+    pixel("ViewContent", {
+      content_name: nombreEquipo(elegido),
+      content_category: "Cambio de pantalla",
+      value: c.final, currency: "MXN"
+    });
   });
 
   /* ============ FORMULARIO: APARTAR PRECIO ============ */
@@ -1103,6 +1131,12 @@ footer strong{color:var(--texto)}
       "Horario: " + horario + "\n" +
       "Mi WhatsApp: " + tel;
 
+    pixel("Lead", {
+      content_name: equipo,
+      content_category: "Cambio de pantalla",
+      value: c.final, currency: "MXN"
+    });
+
     $("wa-cotz").href = abrirWa(msg);
     $("form-cotz").hidden = true;
     $("apartar").hidden = true;
@@ -1166,10 +1200,21 @@ footer strong{color:var(--texto)}
       "Sucursal: " + suc + "\n" +
       "Mi WhatsApp: " + tel;
 
+    pixel("Lead", { content_name: equipo, content_category: servs.join(", ") });
+
     $("wa-otra").href = abrirWa(msg);
     $("form-otra").hidden = true;
     $("exito-otra").hidden = false;
     $("exito-otra").scrollIntoView({behavior:"smooth", block:"center"});
+  });
+
+  /* ============ CLICS A WHATSAPP ============ */
+  Array.prototype.forEach.call(document.querySelectorAll('a[href*="wa.me"]'), function(a){
+    a.addEventListener("click", function(){ pixel("Contact"); });
+  });
+  ["wa-cotz","wa-otra"].forEach(function(id){
+    var el = $(id);
+    if (el) el.addEventListener("click", function(){ pixel("Contact"); });
   });
 
   /* ============ BARRA FIJA ============ */
